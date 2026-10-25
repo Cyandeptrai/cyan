@@ -195,7 +195,7 @@ section{padding:64px 0}
   </div>
 </div>
 
-<!-- POPUP KẾT QUẢ THI KING — MẪU ẨN: chỉ hiện khi RESULTS_DATA (script cuối trang) có đủ dữ liệu Top 1-2-3 thật và cuộc thi đã kết thúc; hiện tại dữ liệu trống nên khách không thấy. Các ô chỉ ghi "Top 1/Top 2/Top 3" + "Đang cập nhật", TUYỆT ĐỐI không hiển thị số xu -->
+<!-- POPUP KẾT QUẢ THI KING — MẪU ẨN: chỉ hiện khi RESULTS_DATA (script cuối trang) có đủ dữ liệu Top 1-2-3 thật và cuộc thi đã kết thúc; hiện tại dữ liệu trống nên khách không thấy. NGOẠI LỆ: link có #xem-mau-ket-qua thì hiện bản mẫu để duyệt trước. Các ô chỉ ghi "Top 1/Top 2/Top 3" + "Đang cập nhật", TUYỆT ĐỐI không hiển thị số xu -->
 <div class="result-overlay" id="resultPopup" role="dialog" aria-modal="true" aria-labelledby="rpTitle">
   <div class="result-panel">
     <button class="cp-close" id="rpClose" type="button" aria-label="Đóng">✕</button>
@@ -801,7 +801,7 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--bamboo) 8%, transp
     </div>
     <p class="sample-note" data-i18n="tlNote">Luồng sự kiện trong một đêm 25/10/2026: 5 round nối tiếp từ 18:30 — đường kẻ sáng dần theo thời gian thật; trước ngày thi, mốc Round 1 phát sáng trước, trong ngày thi toàn bộ luồng cùng sáng.</p>
 
-    <!-- BẢNG VINH DANH NGƯỜI ỦNG HỘ — MẪU ẨN: chỉ hiện khi RESULTS_DATA.honors (script cuối trang) có dữ liệu thật, xếp theo thứ tự ủng hộ nhiều → ít; khi hiện sẽ nằm cố định tại đây (vẫn thấy sau khi đóng popup kết quả). TUYỆT ĐỐI không hiển thị số xu — chỉ ghi nhận công sức -->
+    <!-- BẢNG VINH DANH NGƯỜI ỦNG HỘ — MẪU ẨN: chỉ hiện khi RESULTS_DATA.honors (script cuối trang) có dữ liệu thật, xếp theo thứ tự ủng hộ nhiều → ít; khi hiện sẽ nằm cố định tại đây (vẫn thấy sau khi đóng popup kết quả). NGOẠI LỆ: link có #xem-mau-ket-qua thì hiện bản mẫu (3 hàng chỗ trống Top 1/2/3) để duyệt trước. TUYỆT ĐỐI không hiển thị số xu — chỉ ghi nhận công sức -->
     <div class="king-panel honors" id="honorsBoard" hidden>
       <h3 data-i18n="honorsTitle">🏆 Bảng vinh danh — Tri ân người ủng hộ</h3>
       <p data-i18n="honorsIntro">CYAN xin tri ân những người đã ủng hộ trong đêm Thi King tháng 10. Mỗi sự ủng hộ đều là một phần làm nên đêm thi này. 💛</p>
@@ -1288,6 +1288,8 @@ Object.assign(I18N.th,{bgmLabel:'เพลงประกอบ — YouTube',bgm
 <script>
 /* ===== MẪU KẾT QUẢ THI KING — TRẠNG THÁI ẨN =====
    RESULTS_DATA đang để TRỐNG nên popup kết quả và bảng vinh danh KHÔNG hiện với khách.
+   NGOẠI LỆ DUY NHẤT: link có #xem-mau-ket-qua thì bật CHẾ ĐỘ XEM MẪU (popup podium + bảng vinh danh
+   với ô chỗ trống) để CYAN duyệt trước — khách mở link thường không có hash nên không thấy gì khác.
    Khi CYAN gửi dữ liệu thật (liên kết TikTok + thống kê số xu để xếp hạng), chỉ cần điền vào đây:
      podium: đúng 3 mục theo thứ tự ủng hộ NHIỀU → ÍT: [Top 1, Top 2, Top 3]
      honors: toàn bộ người ủng hộ, theo thứ tự ủng hộ NHIỀU → ÍT
@@ -1299,14 +1301,19 @@ var RESULTS_DATA = { podium: [], honors: [] };
   var CONTEST_END = new Date('2026-10-26T00:00:00+07:00').getTime(); /* cuộc thi kết thúc 24:00 ngày 25/10/2026 (giờ VN) */
   var hasPodium = RESULTS_DATA.podium && RESULTS_DATA.podium.length >= 3;
   var hasHonors = RESULTS_DATA.honors && RESULTS_DATA.honors.length > 0;
+  /* CHẾ ĐỘ XEM MẪU: chỉ khi link có #xem-mau-ket-qua (CYAN mở để duyệt mẫu trước) thì hiện popup podium
+     + bảng vinh danh với các ô chỗ trống "Top 1/Top 2/Top 3" + "Đang cập nhật" (không tên, không avt, không số xu).
+     Không có hash này thì mẫu vẫn ẩn hoàn toàn như cũ. */
+  var PREVIEW = (window.location.hash === '#xem-mau-ket-qua');
 
-  /* --- Bảng vinh danh cố định ở mục Thông báo: có dữ liệu mới hiện --- */
+  /* --- Bảng vinh danh cố định ở mục Thông báo: có dữ liệu mới hiện; chế độ xem mẫu thì hiện 3 hàng chỗ trống --- */
   var board = document.getElementById('honorsBoard');
-  if(board && hasHonors){
+  if(board && (hasHonors || PREVIEW)){
     var body = document.getElementById('honorsBody');
     if(body){
       body.innerHTML = '';
-      RESULTS_DATA.honors.forEach(function(h){
+      var honorRows = hasHonors ? RESULTS_DATA.honors : [1,2,3].map(function(n){ return { name:'Top '+n, avatar:'', note:'' }; });
+      honorRows.forEach(function(h){
         var tr = document.createElement('tr');
         var tdWho = document.createElement('td');
         var who = document.createElement('span'); who.className = 'honor-who';
@@ -1315,6 +1322,7 @@ var RESULTS_DATA = { podium: [], honors: [] };
         var nm = document.createElement('span'); nm.className = 'honor-name'; nm.textContent = h.name || '';
         who.appendChild(av); who.appendChild(nm); tdWho.appendChild(who);
         var tdNote = document.createElement('td'); tdNote.textContent = h.note || '';
+        if(!hasHonors){ tdNote.setAttribute('data-i18n','updating'); tdNote.setAttribute('data-orig','Đang cập nhật'); tdNote.textContent = 'Đang cập nhật'; }
         tr.appendChild(tdWho); tr.appendChild(tdNote);
         body.appendChild(tr);
       });
@@ -1342,12 +1350,19 @@ var RESULTS_DATA = { podium: [], honors: [] };
   addEventListener('keydown', function(e){ if(e.key === 'Escape') closeResults(); });
   var rpShown = false;
   function maybeShowResults(){
-    if(rpShown || !hasPodium) return;
-    if(Date.now() < CONTEST_END) return; /* chỉ hiện sau khi cuộc thi đã kết thúc */
-    var cp = document.getElementById('contestPopup');
-    if(cp && cp.classList.contains('open')) return;
+    if(rpShown) return;
+    if(!PREVIEW){
+      if(!hasPodium) return;
+      if(Date.now() < CONTEST_END) return; /* chỉ hiện sau khi cuộc thi đã kết thúc */
+      var cp = document.getElementById('contestPopup');
+      if(cp && cp.classList.contains('open')) return;
+    }
     rpShown = true;
-    setTimeout(function(){ rp.classList.add('open'); }, 600);
+    setTimeout(function(){
+      /* Xem mẫu: đóng popup xem live (nếu đang mở) để CYAN thấy đúng popup kết quả mẫu */
+      if(PREVIEW){ var cp2 = document.getElementById('contestPopup'); if(cp2) cp2.classList.remove('open'); }
+      rp.classList.add('open');
+    }, 600);
   }
   document.querySelectorAll('.lang-btn').forEach(function(b){ b.addEventListener('click', maybeShowResults); });
 })();
