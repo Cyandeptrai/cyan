@@ -242,11 +242,26 @@ section{padding:64px 0}
   </div>
 </div>
 
-<!-- THANH NHẠC NỀN — "Dear My All" (Mingginyu), bản audio chính thức trên YouTube; tự phát ngay sau khi khách chọn ngôn ngữ, lặp lại, có nút tạm dừng -->
+<!-- THANH NHẠC NỀN — danh sách phát 3 bài trên YouTube (bài đầu mặc định: "Dear My All" — Mingginyu); tự phát ngay sau khi khách chọn ngôn ngữ, lặp lại, có nút tạm dừng. Bấm vào THANH NHẠC (trừ nút dừng/phát) thì mở BẢNG DANH SÁCH NHẠC trượt lên từ dưới; nút dừng/phát chỉ dừng/phát, không mở bảng -->
 <div class="bgm" id="bgmBar" role="region" aria-label="Nhạc nền">
-  <div class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></div>
-  <div class="bgm-meta"><b>♪ Dear My All — Mingginyu</b><span data-i18n="bgmLabel">Nhạc nền — phát từ YouTube</span></div>
-  <button class="bgm-btn" id="bgmToggle" type="button" aria-label="Tạm dừng nhạc">⏸</button>
+  <div class="bgm-main" id="bgmMain" tabindex="0" role="button" aria-label="Danh sách nhạc">
+    <div class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="bgm-meta"><b id="bgmTitle">♪ Dear My All — Mingginyu</b><span data-i18n="bgmLabel">Nhạc nền — phát từ YouTube</span></div>
+    <button class="bgm-btn" id="bgmToggle" type="button" aria-label="Tạm dừng nhạc">⏸</button>
+  </div>
+</div>
+<!-- BẢNG DANH SÁCH NHẠC — trượt lên từ mép dưới, phủ lên nội dung trang; đóng bằng nút ✕, bấm ra ngoài bảng, hoặc phím Escape. Trong bảng: vuốt ngang / kéo chuột để xem các bài, bấm vào một bài là phát bài đó -->
+<div class="bgm-sheet-backdrop" id="bgmSheetBackdrop" aria-hidden="true"></div>
+<div class="bgm-sheet" id="bgmSheet" role="dialog" aria-label="Danh sách nhạc">
+  <div class="bgm-sheet-head">
+    <span data-i18n="bgmListLabel">Danh sách nhạc</span>
+    <div class="bgm-sheet-tools">
+      <button class="bgm-btn bgm-nav" id="bgmPrev" type="button" aria-label="Bài trước">⏮</button>
+      <button class="bgm-btn bgm-nav" id="bgmNext" type="button" aria-label="Bài sau">⏭</button>
+      <button class="bgm-btn bgm-nav" id="bgmSheetClose" type="button" aria-label="Đóng">✕</button>
+    </div>
+  </div>
+  <div class="bgm-tracks" id="bgmTracks" role="listbox" aria-label="Danh sách nhạc"></div>
 </div>
 <div id="bgmFrameWrap" aria-hidden="true"><div id="bgmFrame"></div></div>
 
@@ -756,9 +771,35 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--bamboo) 8%, transp
 .cp-close{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(233,188,69,.5);background:rgba(0,0,0,.35);color:#f6d97b;font-size:16px;font-weight:900;cursor:pointer;line-height:1}
 .cp-close:hover{background:rgba(233,188,69,.2)}
 @media (prefers-reduced-motion: reduce){.contest-overlay.open,.contest-panel{animation:none!important}}
-/* ===== Thanh nhạc nền — "Dear My All" (Mingginyu), audio chính thức trên YouTube ===== */
-.bgm{position:fixed;left:50%;bottom:14px;transform:translate(-50%,90px);z-index:150;display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:7px 14px 7px 8px;box-shadow:var(--shadow);max-width:calc(100vw - 20px);opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.2,.9,.3,1.1),opacity .35s ease}
+/* ===== Thanh nhạc nền — danh sách phát YouTube; bấm vào thanh mở bảng danh sách trượt lên từ dưới ===== */
+.bgm{position:fixed;left:50%;bottom:14px;transform:translate(-50%,90px);z-index:150;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:7px 14px 7px 8px;box-shadow:var(--shadow);max-width:calc(100vw - 20px);opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.2,.9,.3,1.1),opacity .35s ease}
 .bgm.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.bgm-main{display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}
+.bgm-nav{background:transparent;color:var(--text);border:1.5px solid var(--line);box-shadow:none;font-size:12px}
+.bgm-nav:hover{background:color-mix(in srgb,var(--chick) 22%, transparent)}
+/* Bảng danh sách nhạc dạng bottom sheet */
+.bgm-sheet-backdrop{position:fixed;inset:0;z-index:160;background:rgba(6,8,6,.5);opacity:0;pointer-events:none;transition:opacity .3s ease}
+.bgm-sheet-backdrop.open{opacity:1;pointer-events:auto}
+.bgm-sheet{position:fixed;left:50%;bottom:0;z-index:170;width:min(640px,100vw);transform:translate(-50%,110%);transition:transform .38s cubic-bezier(.2,.9,.3,1);background:var(--card);border:1.5px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;box-shadow:var(--shadow);padding:14px 14px calc(16px + env(safe-area-inset-bottom));pointer-events:none}
+.bgm-sheet.open{transform:translate(-50%,0);pointer-events:auto}
+.bgm-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px 4px}
+.bgm-sheet-head>span{font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.bgm-sheet-tools{display:flex;gap:8px;align-items:center}
+.bgm-sheet-tools .bgm-btn{width:34px;height:34px}
+@media (prefers-reduced-motion: reduce){.bgm-sheet,.bgm-sheet-backdrop{transition:none}}
+.bgm-tracks{position:relative;display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;touch-action:pan-x pan-y}
+.bgm-tracks::-webkit-scrollbar{display:none}
+.bgm-tracks.dragging{cursor:grabbing;scroll-snap-type:none}
+.bgm-tracks.dragging .bgm-track{pointer-events:none}
+.bgm-track{flex:0 0 min(248px,74%);scroll-snap-align:center;display:flex;align-items:center;gap:10px;text-align:left;border:1.5px solid var(--line);background:color-mix(in srgb,var(--bg2) 65%, transparent);border-radius:14px;padding:9px 12px;cursor:pointer;color:var(--text);font-family:inherit;min-width:0}
+.bgm-track:hover{border-color:var(--chick)}
+.bgm-track.active{border-color:var(--chick);background:color-mix(in srgb,var(--chick) 16%, var(--card))}
+.bgm-track .t-idx{flex:none;width:24px;height:24px;border-radius:50%;background:var(--line);color:var(--text);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.bgm-track.active .t-idx{background:var(--chick);color:#241a00}
+.bgm-track .t-meta{min-width:0;line-height:1.3}
+.bgm-track .t-meta b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bgm-track .t-meta span{display:block;font-size:11.5px;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:520px){.bgm-track{flex-basis:76%}.bgm-hint{display:none}}
 .bgm-eq{display:flex;align-items:flex-end;justify-content:center;gap:2.5px;width:27px;height:27px;border-radius:50%;background:var(--chick);padding-bottom:7px;flex:none}
 .bgm-eq i{display:block;width:3px;height:5px;background:#241a00;border-radius:2px}
 .bgm.playing .bgm-eq i{animation:bgmEq .9s ease-in-out infinite}
@@ -1508,43 +1549,112 @@ function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate
 </script>
 
 <script>
-/* ===== Nhạc nền: "Dear My All" — Mingginyu, bản audio chính thức trên YouTube (aPazh8KaOMs) =====
+/* ===== Nhạc nền: danh sách phát 3 bài trên YouTube =====
+   1) "Dear My All" — Mingginyu (aPazh8KaOMs) — bài đầu tiên + mặc định, như trước.
+   2) "Nơi này có anh" — Sơn Tùng M-TP (FN7ALfpGxiI) — MV chính thức.
+   3) "Kiếp sau chưa chắc gặp được em (下辈子不一定还能遇见你)" — Mạc Khiếu Tỷ Tỷ (uhlYZ5b91RA) — bản Vietsub.
    Trình duyệt chặn tự phát có tiếng trước khi có tương tác, nên trình phát được nạp sẵn (đang dừng)
-   và nhạc bắt đầu phát ngay trong cú bấm chọn ngôn ngữ đầu tiên. Lặp vô hạn; nút trên thanh nhạc
-   để tạm dừng / phát tiếp. */
-Object.assign(I18N.en,{bgmLabel:'Background music — via YouTube',bgmPause:'Pause music',bgmPlay:'Play music'});
-Object.assign(I18N.ko,{bgmLabel:'배경 음악 — YouTube',bgmPause:'음악 일시정지',bgmPlay:'음악 재생'});
-Object.assign(I18N.ja,{bgmLabel:'BGM — YouTube',bgmPause:'音楽を一時停止',bgmPlay:'音楽を再生'});
-Object.assign(I18N.zh,{bgmLabel:'背景音乐 — YouTube',bgmPause:'暂停音乐',bgmPlay:'播放音乐'});
-Object.assign(I18N.pt,{bgmLabel:'Música de fundo — YouTube',bgmPause:'Pausar música',bgmPlay:'Tocar música'});
-Object.assign(I18N.de,{bgmLabel:'Hintergrundmusik — YouTube',bgmPause:'Musik pausieren',bgmPlay:'Musik abspielen'});
-Object.assign(I18N.pl,{bgmLabel:'Muzyka w tle — YouTube',bgmPause:'Wstrzymaj muzykę',bgmPlay:'Odtwórz muzykę'});
-Object.assign(I18N.th,{bgmLabel:'เพลงประกอบ — YouTube',bgmPause:'หยุดเพลงชั่วคราว',bgmPlay:'เล่นเพลง'});
+   và nhạc bắt đầu phát ngay trong cú bấm chọn ngôn ngữ đầu tiên. Hết bài thì tự chuyển bài kế tiếp
+   và lặp lại cả danh sách. Nút ⏸/▶ trên thanh nhạc CHỈ dừng/phát. Bấm vào thanh nhạc (trừ nút đó)
+   thì mở BẢNG DANH SÁCH dạng bottom sheet trượt lên từ mép dưới; trong bảng, vuốt ngang (điện thoại)
+   hoặc kéo chuột (máy tính) để xem các bài, bấm vào một bài là phát bài đó; đóng bảng bằng nút ✕,
+   bấm ra ngoài hoặc phím Escape. Tên bài + ca sĩ giữ nguyên ở mọi ngôn ngữ (không dịch). */
+Object.assign(I18N.en,{bgmLabel:'Background music — via YouTube',bgmPause:'Pause music',bgmPlay:'Play music',bgmListLabel:'Playlist',bgmPrev:'Previous song',bgmNext:'Next song',bgmClose:'Close'});
+Object.assign(I18N.ko,{bgmLabel:'배경 음악 — YouTube',bgmPause:'음악 일시정지',bgmPlay:'음악 재생',bgmListLabel:'재생 목록',bgmPrev:'이전 곡',bgmNext:'다음 곡',bgmClose:'닫기'});
+Object.assign(I18N.ja,{bgmLabel:'BGM — YouTube',bgmPause:'音楽を一時停止',bgmPlay:'音楽を再生',bgmListLabel:'プレイリスト',bgmPrev:'前の曲',bgmNext:'次の曲',bgmClose:'閉じる'});
+Object.assign(I18N.zh,{bgmLabel:'背景音乐 — YouTube',bgmPause:'暂停音乐',bgmPlay:'播放音乐',bgmListLabel:'播放列表',bgmPrev:'上一首',bgmNext:'下一首',bgmClose:'关闭'});
+Object.assign(I18N.pt,{bgmLabel:'Música de fundo — YouTube',bgmPause:'Pausar música',bgmPlay:'Tocar música',bgmListLabel:'Lista de músicas',bgmPrev:'Música anterior',bgmNext:'Próxima música',bgmClose:'Fechar'});
+Object.assign(I18N.de,{bgmLabel:'Hintergrundmusik — YouTube',bgmPause:'Musik pausieren',bgmPlay:'Musik abspielen',bgmListLabel:'Playlist',bgmPrev:'Vorheriges Lied',bgmNext:'Nächstes Lied',bgmClose:'Schließen'});
+Object.assign(I18N.pl,{bgmLabel:'Muzyka w tle — YouTube',bgmPause:'Wstrzymaj muzykę',bgmPlay:'Odtwórz muzykę',bgmListLabel:'Lista utworów',bgmPrev:'Poprzedni utwór',bgmNext:'Następny utwór',bgmClose:'Zamknij'});
+Object.assign(I18N.th,{bgmLabel:'เพลงประกอบ — YouTube',bgmPause:'หยุดเพลงชั่วคราว',bgmPlay:'เล่นเพลง',bgmListLabel:'รายการเพลง',bgmPrev:'เพลงก่อนหน้า',bgmNext:'เพลงถัดไป',bgmClose:'ปิด'});
 (function(){
-  var VID='aPazh8KaOMs';
+  var TRACKS=[
+    {id:'aPazh8KaOMs', title:'Dear My All', artist:'Mingginyu'},
+    {id:'FN7ALfpGxiI', title:'Nơi này có anh', artist:'Sơn Tùng M-TP'},
+    {id:'uhlYZ5b91RA', title:'Kiếp sau chưa chắc gặp được em (下辈子不一定还能遇见你)', artist:'Mạc Khiếu Tỷ Tỷ'}
+  ];
   var bar=document.getElementById('bgmBar');
   var btn=document.getElementById('bgmToggle');
+  var titleEl=document.getElementById('bgmTitle');
+  var tracksEl=document.getElementById('bgmTracks');
+  var prevBtn=document.getElementById('bgmPrev');
+  var nextBtn=document.getElementById('bgmNext');
+  var mainEl=document.getElementById('bgmMain');
+  var sheet=document.getElementById('bgmSheet');
+  var backdrop=document.getElementById('bgmSheetBackdrop');
+  var closeBtn=document.getElementById('bgmSheetClose');
   if(!bar||!btn) return;
   var player=null, playerReady=false, wantPlay=false, started=false, isPlaying=false;
+  var cur=0, cardEls=[];
   function lbl(k, fb){ var v=window.__t ? window.__t(k) : null; return v || fb; }
   function refreshUI(){
     bar.classList.toggle('playing', isPlaying);
     btn.textContent = isPlaying ? '⏸' : '▶';
     btn.setAttribute('aria-label', isPlaying ? lbl('bgmPause','Tạm dừng nhạc') : lbl('bgmPlay','Phát nhạc'));
     bar.setAttribute('aria-label', lbl('bgmLabel','Nhạc nền'));
+    if(prevBtn) prevBtn.setAttribute('aria-label', lbl('bgmPrev','Bài trước'));
+    if(nextBtn) nextBtn.setAttribute('aria-label', lbl('bgmNext','Bài sau'));
+    if(closeBtn) closeBtn.setAttribute('aria-label', lbl('bgmClose','Đóng'));
+    if(sheet) sheet.setAttribute('aria-label', lbl('bgmListLabel','Danh sách nhạc'));
+    if(mainEl) mainEl.setAttribute('aria-label', lbl('bgmListLabel','Danh sách nhạc'));
+    if(tracksEl) tracksEl.setAttribute('aria-label', lbl('bgmListLabel','Danh sách nhạc'));
+    if(titleEl) titleEl.textContent='♪ '+TRACKS[cur].title+' — '+TRACKS[cur].artist;
+    cardEls.forEach(function(c,i){
+      c.classList.toggle('active', i===cur);
+      c.setAttribute('aria-selected', i===cur ? 'true' : 'false');
+      var idx=c.querySelector('.t-idx'); if(idx) idx.textContent = (i===cur && isPlaying) ? '♪' : String(i+1);
+    });
   }
   function doPlay(){ if(player && playerReady){ try{ player.playVideo(); }catch(e){} } }
+  function centerCard(i, smooth){
+    var c=cardEls[i]; if(!c||!tracksEl) return;
+    var target=c.offsetLeft-(tracksEl.clientWidth-c.clientWidth)/2;
+    try{ tracksEl.scrollTo({left:target, behavior:(smooth && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'smooth' : 'auto'}); }
+    catch(e){ tracksEl.scrollLeft=target; }
+  }
+  function openSheet(){
+    if(!sheet) return;
+    sheet.classList.add('open');
+    if(backdrop) backdrop.classList.add('open');
+    centerCard(cur, false);
+  }
+  function closeSheet(){
+    if(sheet) sheet.classList.remove('open');
+    if(backdrop) backdrop.classList.remove('open');
+  }
+  function selectTrack(i, play){
+    cur=((i%TRACKS.length)+TRACKS.length)%TRACKS.length;
+    refreshUI();
+    centerCard(cur, true);
+    if(player && playerReady){
+      try{ player.loadVideoById(TRACKS[cur].id); }catch(e){}
+      if(play===false){ try{ player.pauseVideo(); }catch(e){} }
+    }
+  }
+  /* Dựng thẻ bài hát trong danh sách vuốt ngang — tên bài/ca sĩ giữ nguyên mọi ngôn ngữ */
+  if(tracksEl){
+    TRACKS.forEach(function(t,i){
+      var b=document.createElement('button');
+      b.type='button'; b.className='bgm-track'; b.setAttribute('role','option');
+      b.setAttribute('aria-label', t.title+' — '+t.artist);
+      b.innerHTML='<span class="t-idx" aria-hidden="true">'+(i+1)+'</span><span class="t-meta"><b></b><span></span></span>';
+      b.querySelector('b').textContent=t.title;
+      b.querySelector('.t-meta span').textContent=t.artist;
+      b.addEventListener('click', function(){ if(suppressClick){ suppressClick=false; return; } selectTrack(i, true); closeSheet(); });
+      tracksEl.appendChild(b); cardEls.push(b);
+    });
+  }
   function createPlayer(){
     if(player || !(window.YT && YT.Player)) return;
     player=new YT.Player('bgmFrame',{
-      videoId:VID, width:'2', height:'2',
-      playerVars:{autoplay:0, loop:1, playlist:VID, controls:0, playsinline:1, rel:0, disablekb:1},
+      videoId:TRACKS[cur].id, width:'2', height:'2',
+      playerVars:{autoplay:0, controls:0, playsinline:1, rel:0, disablekb:1},
       events:{
         onReady:function(){ playerReady=true; if(wantPlay) doPlay(); },
         onStateChange:function(e){
           if(e.data===YT.PlayerState.PLAYING){ isPlaying=true; refreshUI(); }
           else if(e.data===YT.PlayerState.PAUSED){ isPlaying=false; refreshUI(); }
-          else if(e.data===YT.PlayerState.ENDED){ doPlay(); }
+          else if(e.data===YT.PlayerState.ENDED){ selectTrack(cur+1, true); /* hết bài: chuyển bài kế tiếp, hết danh sách thì quay lại bài đầu */ }
         }
       }
     });
@@ -1571,11 +1681,51 @@ Object.assign(I18N.th,{bgmLabel:'เพลงประกอบ — YouTube',bgm
       setTimeout(function(){ if(!playerReady){ bar.classList.remove('show'); isPlaying=false; refreshUI(); } }, 8000);
     });
   });
-  btn.addEventListener('click', function(){
+  /* Nút dừng/phát: CHỈ dừng/phát — chặn sự kiện nổi bọt để không mở bảng danh sách */
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
     if(!player || !playerReady) return;
     if(isPlaying){ try{ player.pauseVideo(); }catch(e){} }
     else { doPlay(); }
   });
+  /* Bấm vào thanh nhạc (bất cứ đâu trừ nút dừng/phát) thì mở bảng danh sách nhạc */
+  if(mainEl){
+    mainEl.addEventListener('click', function(){ openSheet(); });
+    mainEl.addEventListener('keydown', function(e){
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openSheet(); }
+    });
+  }
+  if(closeBtn) closeBtn.addEventListener('click', function(){ closeSheet(); });
+  if(backdrop) backdrop.addEventListener('click', function(){ closeSheet(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSheet(); });
+  if(prevBtn) prevBtn.addEventListener('click', function(){ selectTrack(cur-1, true); });
+  if(nextBtn) nextBtn.addEventListener('click', function(){ selectTrack(cur+1, true); });
+  /* Trong bảng: vuốt ngang (điện thoại) / kéo chuột (máy tính) để XEM các bài — kéo bằng chuột đi qua
+     pointer drag bên dưới; trên điện thoại là cuộn chạm tự nhiên. Phát bài bằng cách bấm vào thẻ bài. */
+  var suppressClick=false;
+  if(tracksEl){
+    var dragOn=false, dragX=0, dragL=0, dragMoved=false;
+    tracksEl.addEventListener('pointerdown', function(e){
+      if(e.pointerType!=='mouse') return; /* chạm trên điện thoại: để cuộn tự nhiên xử lý */
+      dragOn=true; dragMoved=false; dragX=e.clientX; dragL=tracksEl.scrollLeft;
+      tracksEl.classList.add('dragging');
+      try{ tracksEl.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    tracksEl.addEventListener('pointermove', function(e){
+      if(!dragOn) return;
+      var dx=e.clientX-dragX;
+      if(Math.abs(dx)>6) dragMoved=true;
+      tracksEl.scrollLeft=dragL-dx;
+    });
+    function dragEnd(){
+      if(!dragOn) return;
+      dragOn=false;
+      tracksEl.classList.remove('dragging');
+      if(dragMoved){ suppressClick=true; setTimeout(function(){ suppressClick=false; }, 60); }
+    }
+    tracksEl.addEventListener('pointerup', dragEnd);
+    tracksEl.addEventListener('pointercancel', dragEnd);
+  }
   /* Nhãn nút tạm dừng/phát đi theo ngôn ngữ đang chọn */
   if(typeof applyLang==='function'){
     var _applyLang=applyLang;
