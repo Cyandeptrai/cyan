@@ -1549,10 +1549,14 @@ function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate
 </script>
 
 <script>
-/* ===== Nhạc nền: danh sách phát 3 bài trên YouTube =====
-   1) "Dear My All" — Mingginyu (aPazh8KaOMs) — bài đầu tiên + mặc định, như trước.
+/* ===== Nhạc nền: danh sách phát 4 bài trên YouTube =====
+   1) "Dear My All" — Mingginyu (aPazh8KaOMs) — như trước.
    2) "Nơi này có anh" — Sơn Tùng M-TP (FN7ALfpGxiI) — MV chính thức.
    3) "Kiếp sau chưa chắc gặp được em (下辈子不一定还能遇见你)" — Mạc Khiếu Tỷ Tỷ (uhlYZ5b91RA) — bản Vietsub.
+   4) "Trap" — Henry Lau (刘宪华) (IsXB5eRMRno) — MV chính thức, bài nhạc trong link TikTok CYAN gửi 28/10
+      (video "今天是男大", hashtag #trap刘宪华).
+   Mỗi lần tải / tải lại trang, bài mở đầu được chọn NGẪU NHIÊN trong 4 bài (không cố định bài đầu tiên nữa);
+   hết bài thì chuyển bài kế tiếp và lặp lại cả danh sách như trước.
    Trình duyệt chặn tự phát có tiếng trước khi có tương tác, nên trình phát được nạp sẵn (đang dừng)
    và nhạc bắt đầu phát ngay trong cú bấm chọn ngôn ngữ đầu tiên. Hết bài thì tự chuyển bài kế tiếp
    và lặp lại cả danh sách. Nút ⏸/▶ trên thanh nhạc CHỈ dừng/phát. Bấm vào thanh nhạc (trừ nút đó)
@@ -1571,7 +1575,8 @@ Object.assign(I18N.th,{bgmLabel:'เพลงประกอบ — YouTube',bgm
   var TRACKS=[
     {id:'aPazh8KaOMs', title:'Dear My All', artist:'Mingginyu'},
     {id:'FN7ALfpGxiI', title:'Nơi này có anh', artist:'Sơn Tùng M-TP'},
-    {id:'uhlYZ5b91RA', title:'Kiếp sau chưa chắc gặp được em (下辈子不一定还能遇见你)', artist:'Mạc Khiếu Tỷ Tỷ'}
+    {id:'uhlYZ5b91RA', title:'Kiếp sau chưa chắc gặp được em (下辈子不一定还能遇见你)', artist:'Mạc Khiếu Tỷ Tỷ'},
+    {id:'IsXB5eRMRno', title:'Trap', artist:'Henry Lau (刘宪华)'}
   ];
   var bar=document.getElementById('bgmBar');
   var btn=document.getElementById('bgmToggle');
@@ -1585,7 +1590,7 @@ Object.assign(I18N.th,{bgmLabel:'เพลงประกอบ — YouTube',bgm
   var closeBtn=document.getElementById('bgmSheetClose');
   if(!bar||!btn) return;
   var player=null, playerReady=false, wantPlay=false, started=false, isPlaying=false;
-  var cur=0, cardEls=[];
+  var cur=Math.floor(Math.random()*TRACKS.length), cardEls=[]; /* mỗi lần tải trang: chọn ngẫu nhiên bài mở đầu, không cố định */
   function lbl(k, fb){ var v=window.__t ? window.__t(k) : null; return v || fb; }
   function refreshUI(){
     bar.classList.toggle('playing', isPlaying);
